@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Scatter Plot</title>
+    <link rel="stylesheet" href="styles/style.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .charts-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            padding: 20px;
+        }
+
+        svg {
+            width: 48%; /* Adjust width to fit side by side */
+            height: auto;
+            border: 1px solid #ccc;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .list-container {
+            padding: 20px;
+            background-color: #f3f3f3;
+            border-top: 1px solid #ccc;
+            overflow-y: auto;
+        }
+
+        .list-container h3 {
+            font-size: 18px;
+            color: #444;
+            margin-bottom: 10px;
+        }
+
+        #selected-list {
+            padding: 10px;
+            list-style-type: none;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        #selected-list li {
+            padding: 10px;
+            margin: 0;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+            color: #555;
+        }
+
+        #selected-list li:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="charts-container">
+        <svg viewBox="0 0 1000 1000" id="figure1"></svg>
+        <svg viewBox="0 0 1000 1000" id="figure2"></svg>
+    </div>
+    <div class="list-container">
+        <h3>Selected Cars</h3>
+        <ul id="selected-list"></ul>
+    </div>
+
+    <script src="./js/scatterplot.problem.js"></script>
+    <script>
+        d3.csv("data/car_sample_data.csv").then(data => {
+            scatter_plot(
+                data,
+                "#figure1",
+                "MPG vs Price",
+                "Price",
+                "MPG",
+                "Weight",
+                [],
+                "Country",
+                150
+            );
+
+            scatter_plot(
+                data,
+                "#figure2",
+                "Weight vs Engine Size",
+                "EngineSizeCI",
+                "Weight",
+                "Price",
+                [],
+                "Country",
+                150
+            );
+
+            document.addEventListener("mousemove", () => {
+                const listBox = d3.select("#selected-list");
+                const selectedPoints = Array.from(document.querySelectorAll(".selected"));
+                const ids = [...new Set(selectedPoints.map(d => +d.id.split(" ")[0].slice(3)))];
+
+                listBox.selectAll("li").remove();
+
+                if (ids.length > 0) {
+                    listBox.selectAll(".listVals")
+                        .data(ids)
+                        .enter()
+                        .append("li")
+                        .attr("class", "listVals")
+                        .text(d => {
+                            const car = data[d];
+                            return `Model: ${car.Model}, MPG: ${car.MPG}, Weight: ${car.Weight}, Price: ${car.Price}, Country: ${car.Country}`;
+                        });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
